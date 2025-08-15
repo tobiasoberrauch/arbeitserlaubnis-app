@@ -1,0 +1,77 @@
+{
+  "welcome": {
+    "title": "Apply for work permit easily",
+    "subtitle": "Fill out the form with our chatbot's help - in your language",
+    "cta_primary": "Start for free now",
+    "cta_secondary": "How it works"
+  },
+  "languages": {
+    "de": "German",
+    "en": "English",
+    "uk": "Ukrainian",
+    "tr": "Turkish",
+    "ar": "Arabic",
+    "pl": "Polish"
+  },
+  "chatbot": {
+    "greeting": "Hello! I'll help you fill out the work permit form. Let's begin!",
+    "select_language": "In which language would you like to fill out the application?",
+    "start_form": "Start form",
+    "next": "Next",
+    "back": "Back",
+    "save_progress": "Save progress",
+    "preview": "Preview",
+    "download_pdf": "Download PDF",
+    "send_to_authority": "Send to authority"
+  },
+  "form": {
+    "employer": {
+      "label": "Employer",
+      "company_name": "Company name",
+      "company_number": "Company number",
+      "address": "Address",
+      "contact_person": "Contact person",
+      "help_company_number": "You can find the 8-digit company number on employment contracts or pay slips"
+    },
+    "employee": {
+      "label": "Employee",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "date_of_birth": "Date of birth",
+      "nationality": "Nationality",
+      "passport_number": "Passport number",
+      "residence_permit": "Residence permit"
+    },
+    "employment": {
+      "label": "Employment relationship",
+      "start_date": "Start date",
+      "end_date": "End date (if temporary)",
+      "job_title": "Job title",
+      "job_description": "Job description",
+      "working_hours": "Weekly working hours",
+      "salary": "Gross salary (monthly)"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalid_email": "Invalid email address",
+      "invalid_date": "Invalid date",
+      "future_date": "Date is in the future",
+      "invalid_number": "Invalid number"
+    }
+  },
+  "preview": {
+    "title": "Preview your application",
+    "german_version": "German version",
+    "your_language": "In your language",
+    "check_info": "Please check all information carefully",
+    "edit": "Edit",
+    "confirm": "Confirm and create PDF"
+  },
+  "success": {
+    "title": "Successfully created!",
+    "message": "Your application has been successfully created and can now be downloaded.",
+    "download": "Download PDF",
+    "new_application": "Start new application",
+    "share": "Share experience"
+  }
+}

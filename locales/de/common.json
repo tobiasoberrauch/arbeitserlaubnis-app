@@ -1,0 +1,77 @@
+{
+  "welcome": {
+    "title": "Arbeitserlaubnis einfach beantragen",
+    "subtitle": "Fülle das Formular mit Hilfe unseres Chatbots aus - in deiner Sprache",
+    "cta_primary": "Jetzt kostenlos starten",
+    "cta_secondary": "So funktioniert's"
+  },
+  "languages": {
+    "de": "Deutsch",
+    "en": "English",
+    "uk": "Українська",
+    "tr": "Türkçe",
+    "ar": "العربية",
+    "pl": "Polski"
+  },
+  "chatbot": {
+    "greeting": "Hallo! Ich helfe dir beim Ausfüllen des Formulars zur Arbeitserlaubnis. Lass uns beginnen!",
+    "select_language": "In welcher Sprache möchtest du den Antrag ausfüllen?",
+    "start_form": "Formular starten",
+    "next": "Weiter",
+    "back": "Zurück",
+    "save_progress": "Fortschritt speichern",
+    "preview": "Vorschau",
+    "download_pdf": "PDF herunterladen",
+    "send_to_authority": "An Behörde senden"
+  },
+  "form": {
+    "employer": {
+      "label": "Arbeitgeber",
+      "company_name": "Firmenname",
+      "company_number": "Betriebsnummer",
+      "address": "Adresse",
+      "contact_person": "Ansprechpartner",
+      "help_company_number": "Die 8-stellige Betriebsnummer findest du auf Arbeitsverträgen oder Lohnabrechnungen"
+    },
+    "employee": {
+      "label": "Arbeitnehmer",
+      "first_name": "Vorname",
+      "last_name": "Nachname",
+      "date_of_birth": "Geburtsdatum",
+      "nationality": "Staatsangehörigkeit",
+      "passport_number": "Passnummer",
+      "residence_permit": "Aufenthaltstitel"
+    },
+    "employment": {
+      "label": "Beschäftigungsverhältnis",
+      "start_date": "Arbeitsbeginn",
+      "end_date": "Arbeitsende (falls befristet)",
+      "job_title": "Berufsbezeichnung",
+      "job_description": "Tätigkeitsbeschreibung",
+      "working_hours": "Wöchentliche Arbeitszeit",
+      "salary": "Bruttogehalt (monatlich)"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "invalid_email": "Ungültige E-Mail-Adresse",
+      "invalid_date": "Ungültiges Datum",
+      "future_date": "Das Datum liegt in der Zukunft",
+      "invalid_number": "Ungültige Nummer"
+    }
+  },
+  "preview": {
+    "title": "Vorschau deines Antrags",
+    "german_version": "Deutsche Version",
+    "your_language": "In deiner Sprache",
+    "check_info": "Bitte überprüfe alle Angaben sorgfältig",
+    "edit": "Bearbeiten",
+    "confirm": "Bestätigen und PDF erstellen"
+  },
+  "success": {
+    "title": "Erfolgreich erstellt!",
+    "message": "Dein Antrag wurde erfolgreich erstellt und kann nun heruntergeladen werden.",
+    "download": "PDF herunterladen",
+    "new_application": "Neuen Antrag starten",
+    "share": "Erfahrung teilen"
+  }
+}
