@@ -6,7 +6,7 @@ import ClientLayout from '@/components/ClientLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'MIGSTART AI - Multilingual Form Assistant',
+  title: 'MIGStart AI - Multilingual Form Assistant',
   description: 'Fill out German government forms easily in your own language with AI assistance',
 };
 

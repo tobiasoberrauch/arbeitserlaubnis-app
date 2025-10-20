@@ -375,7 +375,7 @@ export default function FormPreview({ formData, onConfirm, onEdit, selectedLangu
                       {formatFieldLabel(key)}
                     </h3>
                     <p className="text-lg text-gray-900">
-                      {value || '-'}
+                      {String(value || '-')}
                     </p>
                   </div>
                   <Check className="w-5 h-5 text-green-500 mt-1" />

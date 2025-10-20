@@ -1,7 +1,7 @@
 {
   "name": "arbeitserlaubnis-app",
   "version": "1.0.0",
-  "description": "Multilingual work permit application assistant",
+  "description": "Multilingual work permit application assistant powered by GermanAI",
   "main": "index.js",
   "scripts": {
     "dev": "next dev -p 6010",
@@ -20,15 +20,16 @@
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
+    "i18next": "^25.6.0",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.539.0",
     "next": "^14.2.31",
-    "ollama": "^0.5.17",
     "pdf-lib": "^1.17.1",
     "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.62.0",
+    "react-i18next": "^16.1.2",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.9.2"
   },

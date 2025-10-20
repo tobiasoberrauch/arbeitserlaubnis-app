@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ollamaFormService from '@/lib/ollamaFormService';
+import germanAIFormService from '@/lib/germanAIFormService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,36 +9,36 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'nextQuestion': {
         const { context } = params;
-        const response = await ollamaFormService.getNextQuestion(context);
+        const response = await germanAIFormService.getNextQuestion(context);
         return NextResponse.json(response);
       }
 
       case 'validate': {
         const { fieldId, answer, language } = params;
-        const validation = await ollamaFormService.validateAnswer(fieldId, answer, language);
+        const validation = await germanAIFormService.validateAnswer(fieldId, answer, language);
         return NextResponse.json(validation);
       }
 
       case 'summary': {
         const { formData, language } = params;
-        const summary = await ollamaFormService.generateSummary(formData, language);
+        const summary = await germanAIFormService.generateSummary(formData, language);
         return NextResponse.json({ summary });
       }
 
       case 'help': {
         const { fieldId, language } = params;
-        const help = await ollamaFormService.provideHelp(fieldId, language);
+        const help = await germanAIFormService.provideHelp(fieldId, language);
         return NextResponse.json({ help });
       }
 
       case 'translate': {
         const { formData, fromLang, toLang } = params;
-        const translated = await ollamaFormService.translateForm(formData, fromLang, toLang);
+        const translated = await germanAIFormService.translateForm(formData, fromLang, toLang);
         return NextResponse.json({ translated });
       }
 
       case 'languages': {
-        const languages = ollamaFormService.getSupportedLanguages();
+        const languages = germanAIFormService.getSupportedLanguages();
         return NextResponse.json({ languages });
       }
 
@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Ollama Form API error:', error);
+    console.error('GermanAI Form API error:', error);
     return NextResponse.json(
-      { error: 'Failed to process form request' },
+      { error: 'Failed to process form request', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

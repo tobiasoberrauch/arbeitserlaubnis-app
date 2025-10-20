@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Globe, Check, AlertCircle, HelpCircle, FileText, Download } from 'lucide-react';
-import ollamaFormService from '@/lib/ollamaFormService';
 import { generatePDF } from '@/lib/pdfGenerator';
 
 interface Message {
@@ -114,7 +113,10 @@ export default function OllamaFormChat() {
   };
 
   const askNextQuestion = async () => {
+    console.log('📋 askNextQuestion called. Step:', currentStep, 'Total:', totalSteps);
+
     if (currentStep >= totalSteps) {
+      console.log('🎉 Form complete! Generating summary...');
       completeForm();
       return;
     }
@@ -133,7 +135,9 @@ export default function OllamaFormChat() {
         userInfo: formData
       };
 
-      const response = await fetch('/api/ollama/form', {
+      console.log('📤 Requesting next question:', context);
+
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -142,10 +146,16 @@ export default function OllamaFormChat() {
         })
       });
 
+      if (!response.ok) {
+        console.error('❌ Next question request failed:', response.status);
+        throw new Error(`Failed to get next question: ${response.status}`);
+      }
+
       const data = await response.json();
-      
+      console.log('📥 Received question:', data);
+
       setCurrentFieldId(data.fieldId);
-      
+
       const questionMessage: Message = {
         id: Date.now().toString(),
         role: 'assistant',
@@ -153,10 +163,20 @@ export default function OllamaFormChat() {
         fieldId: data.fieldId,
         timestamp: new Date()
       };
-      
+
       setMessages(prev => [...prev, questionMessage]);
+      console.log('✅ Question added to messages');
     } catch (error) {
-      console.error('Error getting question:', error);
+      console.error('❌ Error getting question:', error);
+
+      // Show error to user
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: `❌ Error loading next question. Please refresh the page. ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +199,9 @@ export default function OllamaFormChat() {
 
     try {
       // Validate answer
-      const validationResponse = await fetch('/api/ollama/form', {
+      console.log('🔍 Validating answer:', { fieldId: currentFieldId, answer: inputValue, language: selectedLanguage });
+
+      const validationResponse = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -190,7 +212,13 @@ export default function OllamaFormChat() {
         })
       });
 
+      if (!validationResponse.ok) {
+        console.error('❌ Validation request failed:', validationResponse.status);
+        throw new Error(`Validation failed with status ${validationResponse.status}`);
+      }
+
       const validation = await validationResponse.json();
+      console.log('✅ Validation result:', validation);
 
       if (!validation.valid) {
         const errorMessage: Message = {
@@ -205,7 +233,12 @@ export default function OllamaFormChat() {
       }
 
       // Save validated answer
-      const valueToSave = validation.correctedValue || inputValue;
+      const valueToSave = validation.correctedValue && validation.correctedValue.trim()
+        ? validation.correctedValue
+        : inputValue;
+
+      console.log('💾 Saving value:', { fieldId: currentFieldId, value: valueToSave });
+
       setFormData(prev => ({
         ...prev,
         [currentFieldId]: valueToSave
@@ -222,12 +255,24 @@ export default function OllamaFormChat() {
       setMessages(prev => [...prev, confirmMessage]);
 
       // Move to next question
+      console.log('➡️ Moving to next question. Current step:', currentStep);
       setCurrentStep(prev => prev + 1);
+
       setTimeout(() => {
+        console.log('🎯 Asking next question...');
         askNextQuestion();
       }, 500);
     } catch (error) {
-      console.error('Error processing answer:', error);
+      console.error('❌ Error processing answer:', error);
+
+      // Show error to user
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'system',
+        content: `❌ Error processing your answer. Please try again. ${error instanceof Error ? error.message : 'Unknown error'}`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -252,7 +297,7 @@ export default function OllamaFormChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ollama/form', {
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -300,7 +345,7 @@ export default function OllamaFormChat() {
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/ollama/form', {
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -329,8 +374,10 @@ export default function OllamaFormChat() {
 
   const downloadPDF = async () => {
     try {
-      const pdfBlob = await generatePDF(formData, selectedLanguage);
-      const url = window.URL.createObjectURL(pdfBlob);
+      const pdfBytes = await generatePDF(formData);
+      // Convert Uint8Array to Blob for download
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `arbeitserlaubnis_${Date.now()}.pdf`;
@@ -350,7 +397,7 @@ export default function OllamaFormChat() {
             <div className="flex items-center gap-3">
               <Bot className="w-6 h-6 text-blue-600" />
               <div>
-                <h2 className="font-bold text-gray-900">Arbeitserlaubnis AI Assistant</h2>
+                <h2 className="font-bold text-gray-900">Arbeitserlaubnis AI Assistant (GermanAI)</h2>
                 <p className="text-sm text-gray-600">
                   Step {currentStep + 1} of {totalSteps}
                 </p>

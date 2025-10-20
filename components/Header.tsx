@@ -106,7 +106,7 @@ export default function Header({ selectedLanguage = 'de', onLanguageChange }: He
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">MIGSTART</h1>
+                  <h1 className="text-xl font-bold text-gray-900">MIGStart</h1>
                 </div>
               </div>
             </Link>

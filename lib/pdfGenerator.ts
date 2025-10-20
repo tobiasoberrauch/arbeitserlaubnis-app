@@ -258,6 +258,5 @@ export async function generatePDF(formData: any): Promise<Uint8Array> {
   
   // Serialize the PDF to bytes
   const pdfBytes = await pdfDoc.save();
-  
   return pdfBytes;
 }
