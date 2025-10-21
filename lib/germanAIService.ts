@@ -118,7 +118,7 @@ class GermanAIService implements AIService {
 
   async streamChat(
     messages: ChatMessage[],
-    config?: GermanAIConfig,
+    config?: AIConfig,
     onChunk?: (chunk: string) => void
   ): Promise<string> {
     try {

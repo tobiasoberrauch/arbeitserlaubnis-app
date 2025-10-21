@@ -379,16 +379,16 @@ export default function WorkPermitForm({
       const months: { [key: string]: string } = {
         'januar': '01', 'january': '01', 'jan': '01',
         'februar': '02', 'february': '02', 'feb': '02',
-        'märz': '03', 'march': '03',
-        'april': '04', 'april': '04',
+        'märz': '03', 'march': '03', 'mar': '03',
+        'april': '04', 'apr': '04',
         'mai': '05', 'may': '05',
-        'juni': '06', 'june': '06',
-        'juli': '07', 'july': '07',
-        'august': '08', 'august': '08',
-        'september': '09', 'september': '09',
-        'oktober': '10', 'october': '10',
-        'november': '11', 'november': '11',
-        'dezember': '12', 'december': '12'
+        'juni': '06', 'june': '06', 'jun': '06',
+        'juli': '07', 'july': '07', 'jul': '07',
+        'august': '08', 'aug': '08',
+        'september': '09', 'sep': '09', 'sept': '09',
+        'oktober': '10', 'october': '10', 'oct': '10', 'okt': '10',
+        'november': '11', 'nov': '11',
+        'dezember': '12', 'december': '12', 'dec': '12', 'dez': '12'
       };
       const month = months[monthName.toLowerCase()];
       if (month) {
