@@ -405,20 +405,42 @@ export default function WorkPermitForm({
 
     const normalized = value.toLowerCase().trim();
 
-    // Nationality mapping
+    // Nationality mapping - maps to country codes (TR, SY, PL, UA, etc.)
     if (fieldId === 'nationality') {
       const nationalityMap: { [key: string]: string } = {
-        'deutsch': 'german', 'germany': 'german', 'deutschland': 'german',
-        'türkisch': 'turkish', 'türkei': 'turkish', 'turkey': 'turkish',
-        'polnisch': 'polish', 'polen': 'polish', 'poland': 'polish',
-        'ukrainisch': 'ukrainian', 'ukraine': 'ukrainian',
-        'spanisch': 'spanish', 'spanien': 'spanish', 'spain': 'spanish',
-        'französisch': 'french', 'frankreich': 'french', 'france': 'french',
-        'italienisch': 'italian', 'italien': 'italian', 'italy': 'italian',
-        'portugiesisch': 'portuguese', 'portugal': 'portuguese',
-        'russisch': 'russian', 'russland': 'russian', 'russia': 'russian',
-        'chinesisch': 'chinese', 'china': 'chinese',
-        'indisch': 'indian', 'indien': 'indian', 'india': 'indian'
+        // German
+        'deutsch': 'DE', 'german': 'DE', 'germany': 'DE', 'deutschland': 'DE',
+        // Turkish
+        'türkisch': 'TR', 'turkish': 'TR', 'türkei': 'TR', 'turkey': 'TR', 'türkiye': 'TR',
+        // Syrian
+        'syrisch': 'SY', 'syrian': 'SY', 'syrien': 'SY', 'syria': 'SY', 'suriye': 'SY',
+        // Polish
+        'polnisch': 'PL', 'polish': 'PL', 'polen': 'PL', 'poland': 'PL', 'polska': 'PL',
+        // Ukrainian
+        'ukrainisch': 'UA', 'ukrainian': 'UA', 'ukraine': 'UA', 'україна': 'UA',
+        // Indian
+        'indisch': 'IN', 'indian': 'IN', 'indien': 'IN', 'india': 'IN',
+        // Russian
+        'russisch': 'RU', 'russian': 'RU', 'russland': 'RU', 'russia': 'RU', 'россия': 'RU',
+        // Chinese
+        'chinesisch': 'CN', 'chinese': 'CN', 'china': 'CN', '中国': 'CN',
+        // American/USA
+        'amerikanisch': 'US', 'american': 'US', 'usa': 'US', 'united states': 'US',
+        // Spanish
+        'spanisch': 'ES', 'spanish': 'ES', 'spanien': 'ES', 'spain': 'ES',
+        // French
+        'französisch': 'FR', 'french': 'FR', 'frankreich': 'FR', 'france': 'FR',
+        // Italian
+        'italienisch': 'IT', 'italian': 'IT', 'italien': 'IT', 'italy': 'IT',
+        // Portuguese
+        'portugiesisch': 'PT', 'portuguese': 'PT', 'portugal': 'PT',
+        // Other common countries
+        'british': 'GB', 'uk': 'GB', 'united kingdom': 'GB', 'großbritannien': 'GB',
+        'romanian': 'RO', 'rumänisch': 'RO', 'romania': 'RO', 'rumänien': 'RO',
+        'bulgarian': 'BG', 'bulgarisch': 'BG', 'bulgaria': 'BG', 'bulgarien': 'BG',
+        'greek': 'GR', 'griechisch': 'GR', 'greece': 'GR', 'griechenland': 'GR',
+        // Fallback for "other"
+        'andere': 'OTHER', 'other': 'OTHER', 'sonstige': 'OTHER'
       };
       return nationalityMap[normalized] || value;
     }
@@ -434,16 +456,16 @@ export default function WorkPermitForm({
       return maritalMap[normalized] || value;
     }
 
-    // German level mapping
+    // German level mapping - maps to uppercase levels (A1, A2, B1, B2, C1, C2)
     if (fieldId === 'germanLevel') {
       const levelMap: { [key: string]: string } = {
-        'keine': 'none', 'no': 'none', 'none': 'none',
-        'a1': 'a1', 'anfänger': 'a1',
-        'a2': 'a2',
-        'b1': 'b1',
-        'b2': 'b2',
-        'c1': 'c1',
-        'c2': 'c2', 'fließend': 'c2', 'fluent': 'c2'
+        'keine': 'none', 'no': 'none', 'none': 'none', 'kein': 'none',
+        'a1': 'A1', 'anfänger': 'A1', 'beginner': 'A1',
+        'a2': 'A2', 'grundkenntnisse': 'A2', 'elementary': 'A2',
+        'b1': 'B1', 'mittelstufe': 'B1', 'intermediate': 'B1',
+        'b2': 'B2', 'gute mittelstufe': 'B2', 'upper intermediate': 'B2',
+        'c1': 'C1', 'fortgeschritten': 'C1', 'advanced': 'C1',
+        'c2': 'C2', 'exzellent': 'C2', 'fließend': 'C2', 'fluent': 'C2', 'proficient': 'C2'
       };
       return levelMap[normalized] || value;
     }
@@ -1386,7 +1408,18 @@ export default function WorkPermitForm({
     
     const demoData = demoDataByLanguage[selectedLanguage] || demoDataByLanguage['de'];
 
-    setFormData(demoData);
+    // Only fill empty fields, don't overwrite existing values
+    setFormData(prev => {
+      const merged = { ...prev }; // Start with existing data
+      // Add demo data only for empty fields
+      Object.keys(demoData).forEach(key => {
+        if (!merged[key] || merged[key] === '') { // Only if field is empty
+          merged[key] = demoData[key];
+        }
+      });
+      return merged;
+    });
+
     setCurrentStep(totalSteps); // Set to last step to show completion
     
     // Remove loading message and show success message
