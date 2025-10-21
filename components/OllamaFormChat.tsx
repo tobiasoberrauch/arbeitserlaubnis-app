@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Globe, Check, AlertCircle, HelpCircle, FileText, Download } from 'lucide-react';
 import { generatePDF } from '@/lib/pdfGenerator';
+import { formatAIResponse } from '@/lib/formatAIResponse';
 
 interface Message {
   id: string;
@@ -487,7 +488,14 @@ export default function OllamaFormChat() {
                     : 'bg-white text-gray-900 shadow-md border'
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                {message.role === 'user' ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : (
+                  <div
+                    className="whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: formatAIResponse(message.content, true) }}
+                  />
+                )}
                 <p className={`text-xs mt-2 ${
                   message.role === 'user' ? 'text-blue-200' : 'text-gray-500'
                 }`}>

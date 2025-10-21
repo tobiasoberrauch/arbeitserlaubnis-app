@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Globe, HelpCircle, FileText, Check, Edit3, TestTube, Download, Printer } from 'lucide-react';
 import ExportModal from './ExportModal';
+import { formatAIResponse } from '@/lib/formatAIResponse';
 
 interface WorkPermitFormProps {
   onComplete: (data: any) => void;
@@ -1420,7 +1421,14 @@ export default function WorkPermitForm({
                       : 'bg-white text-gray-900 shadow-sm border'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  {message.role === 'user' ? (
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  ) : (
+                    <div
+                      className="whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{ __html: formatAIResponse(message.content, true) }}
+                    />
+                  )}
                   <p className={`text-xs mt-1 ${
                     message.role === 'user' ? 'text-blue-200' : 'text-gray-500'
                   }`}>
