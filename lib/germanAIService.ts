@@ -28,14 +28,14 @@ class GermanAIService {
   private defaultModel: string;
 
   private systemPrompts: { [key: string]: string } = {
-    de: 'Du bist ein hilfreicher Assistent für Arbeitserlaubnis-Anträge in Deutschland. Antworte auf Deutsch.',
-    en: 'You are a helpful assistant for work permit applications in Germany. Answer in English.',
-    tr: 'Almanya\'da çalışma izni başvuruları için yardımcı bir asistansınız. Türkçe cevap verin.',
-    ar: 'أنت مساعد مفيد لطلبات تصاريح العمل في ألمانيا. أجب بالعربية.',
-    pl: 'Jesteś pomocnym asystentem do wniosków o pozwolenie na pracę w Niemczech. Odpowiadaj po polsku.',
-    uk: 'Ви корисний асистент для заявок на дозвіл на роботу в Німеччині. Відповідайте українською.',
-    es: 'Eres un asistente útil para solicitudes de permisos de trabajo en Alemania. Responde en español.',
-    fr: 'Vous êtes un assistant utile pour les demandes de permis de travail en Allemagne. Répondez en français.'
+    de: 'Du bist ein hilfreicher Assistent für Arbeitserlaubnis-Anträge in Deutschland. Antworte auf Deutsch. WICHTIG: Antworte OHNE <think> Tags und OHNE Markdown-Formatierung (kein **, __, *, _). Verwende nur einfachen Text.',
+    en: 'You are a helpful assistant for work permit applications in Germany. Answer in English. IMPORTANT: Answer WITHOUT <think> tags and WITHOUT markdown formatting (no **, __, *, _). Use plain text only.',
+    tr: 'Almanya\'da çalışma izni başvuruları için yardımcı bir asistansınız. Türkçe cevap verin. ÖNEMLİ: <think> etiketleri ve markdown formatlaması OLMADAN cevap verin (**, __, *, _ yok). Sadece düz metin kullanın.',
+    ar: 'أنت مساعد مفيد لطلبات تصاريح العمل في ألمانيا. أجب بالعربية. مهم: أجب بدون علامات <think> وبدون تنسيق markdown (لا **, __, *, _). استخدم نصًا عاديًا فقط.',
+    pl: 'Jesteś pomocnym asystentem do wniosków o pozwolenie na pracę w Niemczech. Odpowiadaj po polsku. WAŻNE: Odpowiadaj BEZ tagów <think> i BEZ formatowania markdown (bez **, __, *, _). Używaj tylko zwykłego tekstu.',
+    uk: 'Ви корисний асистент для заявок на дозвіл на роботу в Німеччині. Відповідайте українською. ВАЖЛИВО: Відповідайте БЕЗ тегів <think> і БЕЗ форматування markdown (без **, __, *, _). Використовуйте лише простий текст.',
+    es: 'Eres un asistente útil para solicitudes de permisos de trabajo en Alemania. Responde en español. IMPORTANTE: Responde SIN etiquetas <think> y SIN formato markdown (sin **, __, *, _). Usa solo texto plano.',
+    fr: 'Vous êtes un assistant utile pour les demandes de permis de travail en Allemagne. Répondez en français. IMPORTANT : Répondez SANS balises <think> et SANS formatage markdown (pas de **, __, *, _). Utilisez uniquement du texte brut.'
   };
 
   constructor() {
@@ -85,7 +85,10 @@ class GermanAIService {
       }
 
       const data = await response.json();
-      const content = data.choices[0].message.content;
+      let content = data.choices[0].message.content;
+
+      // Clean up response: remove <think> tags and markdown formatting
+      content = this.cleanResponse(content);
 
       return {
         message: content,
@@ -96,6 +99,28 @@ class GermanAIService {
       console.error('GermanAI chat error:', error);
       throw new Error('Failed to get response from GermanAI');
     }
+  }
+
+  private cleanResponse(content: string): string {
+    // Remove <think>...</think> tags and their content
+    content = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+    // Remove markdown formatting
+    // Bold: **text** or __text__
+    content = content.replace(/\*\*(.+?)\*\*/g, '$1');
+    content = content.replace(/__(.+?)__/g, '$1');
+
+    // Italic: *text* or _text_
+    content = content.replace(/\*(.+?)\*/g, '$1');
+    content = content.replace(/_(.+?)_/g, '$1');
+
+    // Clean up multiple consecutive newlines
+    content = content.replace(/\n{3,}/g, '\n\n');
+
+    // Trim whitespace
+    content = content.trim();
+
+    return content;
   }
 
   async listModels(): Promise<string[]> {
