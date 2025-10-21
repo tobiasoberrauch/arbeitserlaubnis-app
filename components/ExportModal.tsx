@@ -44,10 +44,11 @@ export default function ExportModal({ isOpen, onClose, formData, selectedLanguag
         data = cleanData;
       }
       
-      const response = await fetch('/api/ollama/translate', {
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'translate',
           values: data,
           fromLanguage: selectedLanguage,
           toLanguage: targetLanguage

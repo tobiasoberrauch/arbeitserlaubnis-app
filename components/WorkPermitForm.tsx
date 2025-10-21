@@ -419,10 +419,11 @@ export default function WorkPermitForm({
     setMessages(prev => [...prev, translatingMessage]);
 
     try {
-      const response = await fetch('/api/ollama/translate', {
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'translate',
           values: formData,
           fromLanguage: fromLang,
           toLanguage: toLang
@@ -543,7 +544,7 @@ export default function WorkPermitForm({
         userInfo: formData
       };
 
-      const response = await fetch('/api/ollama/form', {
+      const response = await fetch('/api/chat/form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

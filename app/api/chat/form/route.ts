@@ -32,9 +32,13 @@ export async function POST(request: NextRequest) {
       }
 
       case 'translate': {
-        const { formData, fromLang, toLang } = params;
-        const translated = await germanAIFormService.translateForm(formData, fromLang, toLang);
-        return NextResponse.json({ translated });
+        const { values, formData, fromLanguage, toLanguage, fromLang, toLang } = params;
+        // Support both parameter names for backwards compatibility
+        const dataToTranslate = values || formData;
+        const sourceLang = fromLanguage || fromLang;
+        const targetLang = toLanguage || toLang;
+        const translatedValues = await germanAIFormService.translateForm(dataToTranslate, sourceLang, targetLang);
+        return NextResponse.json({ translatedValues });
       }
 
       case 'languages': {
