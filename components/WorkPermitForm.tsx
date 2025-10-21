@@ -407,6 +407,7 @@ export default function WorkPermitForm({
 
     // Nationality mapping - maps to country codes (TR, SY, PL, UA, etc.)
     if (fieldId === 'nationality') {
+      console.log('🔍 Nationality input:', value, '| normalized:', normalized);
       const nationalityMap: { [key: string]: string } = {
         // German
         'deutsch': 'DE', 'german': 'DE', 'germany': 'DE', 'deutschland': 'DE',
@@ -442,7 +443,9 @@ export default function WorkPermitForm({
         // Fallback for "other"
         'andere': 'OTHER', 'other': 'OTHER', 'sonstige': 'OTHER'
       };
-      return nationalityMap[normalized] || value;
+      const result = nationalityMap[normalized] || value;
+      console.log('✅ Nationality mapped to:', result);
+      return result;
     }
 
     // Marital status mapping
