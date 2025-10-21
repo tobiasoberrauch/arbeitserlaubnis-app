@@ -113,10 +113,10 @@ export default function OllamaFormChat() {
     return messages[selectedLanguage] || messages['en'];
   };
 
-  const askNextQuestion = async () => {
-    console.log('📋 askNextQuestion called. Step:', currentStep, 'Total:', totalSteps);
+  const askNextQuestionForStep = async (step: number) => {
+    console.log('📋 askNextQuestionForStep called. Step:', step, 'Total:', totalSteps);
 
-    if (currentStep >= totalSteps) {
+    if (step >= totalSteps) {
       console.log('🎉 Form complete! Generating summary...');
       completeForm();
       return;
@@ -126,7 +126,7 @@ export default function OllamaFormChat() {
     try {
       const context = {
         language: selectedLanguage,
-        currentStep,
+        currentStep: step,
         totalSteps,
         fields: Object.entries(formData).map(([id, value]) => ({
           id,
@@ -136,7 +136,7 @@ export default function OllamaFormChat() {
         userInfo: formData
       };
 
-      console.log('📤 Requesting next question:', context);
+      console.log('📤 Requesting next question for step', step, ':', context);
 
       const response = await fetch('/api/chat/form', {
         method: 'POST',
@@ -181,6 +181,10 @@ export default function OllamaFormChat() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const askNextQuestion = async () => {
+    return askNextQuestionForStep(currentStep);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -255,14 +259,21 @@ export default function OllamaFormChat() {
       };
       setMessages(prev => [...prev, confirmMessage]);
 
-      // Move to next question
+      // Move to next question immediately
       console.log('➡️ Moving to next question. Current step:', currentStep);
-      setCurrentStep(prev => prev + 1);
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
 
+      // Ask next question immediately (don't wait for state update)
+      console.log('🎯 Asking next question for step:', nextStep);
       setTimeout(() => {
-        console.log('🎯 Asking next question...');
-        askNextQuestion();
-      }, 500);
+        if (nextStep >= totalSteps) {
+          console.log('🎉 Form complete!');
+          completeForm();
+        } else {
+          askNextQuestionForStep(nextStep);
+        }
+      }, 300);
     } catch (error) {
       console.error('❌ Error processing answer:', error);
 
