@@ -21,7 +21,7 @@ export default function LandingPage() {
 
   const content = {
     de: {
-      title: 'Formulare einfach ausfüllen',
+      title: 'Ihr digitaler Assistent für Aufenthalt und Arbeit in Deutschland',
       subtitle: 'KI-gestützte Unterstützung für deutsche Behördenformulare in Ihrer Sprache',
       description: 'Wählen Sie das gewünschte Formular aus und lassen Sie sich Schritt für Schritt in Ihrer Muttersprache durch den Prozess führen.',
       forms: 'Verfügbare Formulare',
@@ -38,7 +38,7 @@ export default function LandingPage() {
       comingSoon: 'Demnächst verfügbar'
     },
     en: {
-      title: 'Fill Forms Easily',
+      title: 'Your digital assistant for residence and work in Germany',
       subtitle: 'Assistance for German government forms in your language',
       description: 'Select the desired form and let us guide you step by step through the process in your native language.',
       forms: 'Available Forms',
@@ -55,7 +55,7 @@ export default function LandingPage() {
       comingSoon: 'Coming Soon'
     },
     tr: {
-      title: 'Formları Kolayca Doldurun',
+      title: 'Almanya\'da ikamet ve çalışma için dijital asistanınız',
       subtitle: 'Alman devlet formları için kendi dilinizde AI destekli yardım',
       description: 'İstediğiniz formu seçin ve ana dilinizde adım adım süreç boyunca size rehberlik edelim.',
       forms: 'Mevcut Formlar',
@@ -72,7 +72,7 @@ export default function LandingPage() {
       comingSoon: 'Yakında'
     },
     ar: {
-      title: 'املأ النماذج بسهولة',
+      title: 'مساعدك الرقمي للإقامة والعمل في ألمانيا',
       subtitle: 'مساعدة مدعومة بالذكاء الاصطناعي للنماذج الحكومية الألمانية بلغتك',
       description: 'اختر النموذج المطلوب ودعنا نرشدك خطوة بخطوة خلال العملية بلغتك الأم.',
       forms: 'النماذج المتاحة',
@@ -89,7 +89,7 @@ export default function LandingPage() {
       comingSoon: 'قريباً'
     },
     pl: {
-      title: 'Wypełniaj formularze łatwo',
+      title: 'Twój cyfrowy asystent do pobytu i pracy w Niemczech',
       subtitle: 'Pomoc AI dla niemieckich formularzy rządowych w Twoim języku',
       description: 'Wybierz żądany formularz i pozwól nam poprowadzić Cię krok po kroku przez proces w Twoim ojczystym języku.',
       forms: 'Dostępne formularze',
@@ -106,7 +106,7 @@ export default function LandingPage() {
       comingSoon: 'Wkrótce'
     },
     uk: {
-      title: 'Заповнюйте форми легко',
+      title: 'Ваш цифровий асистент для проживання та роботи в Німеччині',
       subtitle: 'AI-підтримка для німецьких державних форм вашою мовою',
       description: 'Виберіть потрібну форму і дозвольте нам провести вас крок за кроком через процес вашою рідною мовою.',
       forms: 'Доступні форми',
@@ -123,7 +123,7 @@ export default function LandingPage() {
       comingSoon: 'Незабаром'
     },
     es: {
-      title: 'Rellene formularios fácilmente',
+      title: 'Su asistente digital para residencia y trabajo en Alemania',
       subtitle: 'Asistencia con IA para formularios gubernamentales alemanes en su idioma',
       description: 'Seleccione el formulario deseado y déjenos guiarle paso a paso a través del proceso en su idioma nativo.',
       forms: 'Formularios disponibles',
@@ -140,7 +140,7 @@ export default function LandingPage() {
       comingSoon: 'Próximamente'
     },
     fr: {
-      title: 'Remplissez les formulaires facilement',
+      title: 'Votre assistant numérique pour le séjour et le travail en Allemagne',
       subtitle: 'Assistance IA pour les formulaires gouvernementaux allemands dans votre langue',
       description: 'Sélectionnez le formulaire souhaité et laissez-nous vous guider étape par étape dans votre langue maternelle.',
       forms: 'Formulaires disponibles',
@@ -278,7 +278,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center">
-          <h2 className="text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-5xl font-bold text-blue-600 mb-4">
             {getText('title')}
           </h2>
           <p className="text-xl text-gray-600 mb-4">

@@ -333,7 +333,132 @@ export default function WorkPermitForm({
   const prevLanguageRef = useRef(selectedLanguage);
 
   const totalSteps = formFields.length;
-  const progress = ((currentStep / totalSteps) * 100);
+  const filledFields = Object.keys(formData).filter(key => formData[key]).length;
+  const progress = ((filledFields / totalSteps) * 100);
+
+  // Format name to Title Case (capitalize first letter of each word)
+  const formatNameToTitleCase = (name: string): string => {
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  };
+
+  // Parse date from various formats to YYYY-MM-DD
+  const parseDate = (dateStr: string): string | null => {
+    if (!dateStr) return null;
+
+    // Already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+
+    // DD.MM.YYYY format (German)
+    const germanMatch = dateStr.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (germanMatch) {
+      const [, day, month, year] = germanMatch;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // DD/MM/YYYY or MM/DD/YYYY
+    const slashMatch = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (slashMatch) {
+      const [, first, second, year] = slashMatch;
+      // Assume DD/MM/YYYY for European format
+      return `${year}-${second.padStart(2, '0')}-${first.padStart(2, '0')}`;
+    }
+
+    // Try to extract year, month, day from text
+    const textMatch = dateStr.match(/(\d{1,2})[.\s]+(\w+)[.\s]+(\d{4})/);
+    if (textMatch) {
+      const [, day, monthName, year] = textMatch;
+      const months: { [key: string]: string } = {
+        'januar': '01', 'january': '01', 'jan': '01',
+        'februar': '02', 'february': '02', 'feb': '02',
+        'märz': '03', 'march': '03',
+        'april': '04', 'april': '04',
+        'mai': '05', 'may': '05',
+        'juni': '06', 'june': '06',
+        'juli': '07', 'july': '07',
+        'august': '08', 'august': '08',
+        'september': '09', 'september': '09',
+        'oktober': '10', 'october': '10',
+        'november': '11', 'november': '11',
+        'dezember': '12', 'december': '12'
+      };
+      const month = months[monthName.toLowerCase()];
+      if (month) {
+        return `${year}-${month}-${day.padStart(2, '0')}`;
+      }
+    }
+
+    return null;
+  };
+
+  // Normalize dropdown values
+  const normalizeDropdownValue = (fieldId: string, value: string): string => {
+    if (!value) return value;
+
+    const normalized = value.toLowerCase().trim();
+
+    // Nationality mapping
+    if (fieldId === 'nationality') {
+      const nationalityMap: { [key: string]: string } = {
+        'deutsch': 'german', 'germany': 'german', 'deutschland': 'german',
+        'türkisch': 'turkish', 'türkei': 'turkish', 'turkey': 'turkish',
+        'polnisch': 'polish', 'polen': 'polish', 'poland': 'polish',
+        'ukrainisch': 'ukrainian', 'ukraine': 'ukrainian',
+        'spanisch': 'spanish', 'spanien': 'spanish', 'spain': 'spanish',
+        'französisch': 'french', 'frankreich': 'french', 'france': 'french',
+        'italienisch': 'italian', 'italien': 'italian', 'italy': 'italian',
+        'portugiesisch': 'portuguese', 'portugal': 'portuguese',
+        'russisch': 'russian', 'russland': 'russian', 'russia': 'russian',
+        'chinesisch': 'chinese', 'china': 'chinese',
+        'indisch': 'indian', 'indien': 'indian', 'india': 'indian'
+      };
+      return nationalityMap[normalized] || value;
+    }
+
+    // Marital status mapping
+    if (fieldId === 'maritalStatus') {
+      const maritalMap: { [key: string]: string } = {
+        'ledig': 'single', 'unverheiratet': 'single', 'single': 'single',
+        'verheiratet': 'married', 'married': 'married',
+        'geschieden': 'divorced', 'divorced': 'divorced',
+        'verwitwet': 'widowed', 'widowed': 'widowed'
+      };
+      return maritalMap[normalized] || value;
+    }
+
+    // German level mapping
+    if (fieldId === 'germanLevel') {
+      const levelMap: { [key: string]: string } = {
+        'keine': 'none', 'no': 'none', 'none': 'none',
+        'a1': 'a1', 'anfänger': 'a1',
+        'a2': 'a2',
+        'b1': 'b1',
+        'b2': 'b2',
+        'c1': 'c1',
+        'c2': 'c2', 'fließend': 'c2', 'fluent': 'c2'
+      };
+      return levelMap[normalized] || value;
+    }
+
+    // Yes/No mapping
+    if (fieldId === 'criminalRecord') {
+      const yesNoMap: { [key: string]: string } = {
+        'ja': 'yes', 'yes': 'yes',
+        'nein': 'no', 'no': 'no'
+      };
+      return yesNoMap[normalized] || value;
+    }
+
+    return value;
+  };
 
   // Initialize only once
   useEffect(() => {
@@ -485,10 +610,8 @@ export default function WorkPermitForm({
     };
     
     setMessages([welcomeMessage]);
-    
-    setTimeout(() => {
-      askNextQuestion();
-    }, 1000);
+
+    askNextQuestion();
   };
 
   const getWelcomeMessage = () => {
@@ -505,15 +628,40 @@ export default function WorkPermitForm({
     return messages[selectedLanguage] || messages['de'];
   };
 
-  const askNextQuestion = async () => {
-    // Skip to next empty field if current field is already filled
-    let nextStep = currentStep;
-    while (nextStep < totalSteps && formData[formFields[nextStep].id]) {
+  const askNextQuestion = async (startIndex?: number, dataOverride?: FormData) => {
+    let nextStep = typeof startIndex === 'number' ? startIndex : currentStep;
+    const values = dataOverride ?? formData;
+    while (nextStep < totalSteps && values[formFields[nextStep].id]) {
       nextStep++;
     }
 
     if (nextStep >= totalSteps) {
-      onComplete(formData);
+      // Show completion message
+      const completionMessages: { [key: string]: string } = {
+        de: '🎉 **Glückwunsch!** Ihr Arbeitserlaubnis-Antrag ist vollständig ausgefüllt.\n\n✅ Alle 24 Felder sind komplett!\n\n📄 Sie können Ihr Formular jetzt:\n• Als **PDF drucken** (Drucken-Button oben rechts)\n• Als **PDF, Word, Excel oder JSON exportieren** (Export-Button oben rechts)\n\nIhr Antrag ist bereit zur Einreichung! 🚀',
+        en: '🎉 **Congratulations!** Your work permit application is complete.\n\n✅ All 24 fields are filled!\n\n📄 You can now:\n• **Print as PDF** (Print button top right)\n• **Export as PDF, Word, Excel or JSON** (Export button top right)\n\nYour application is ready for submission! 🚀',
+        tr: '🎉 **Tebrikler!** Çalışma izni başvurunuz tamamlandı.\n\n✅ 24 alanın tümü dolduruldu!\n\n📄 Şimdi yapabilirsiniz:\n• **PDF olarak yazdır** (Sağ üstteki yazdır butonu)\n• **PDF, Word, Excel veya JSON olarak dışa aktar** (Sağ üstteki dışa aktar butonu)\n\nBaşvurunuz gönderime hazır! 🚀',
+        ar: '🎉 **تهانينا!** طلب تصريح العمل الخاص بك مكتمل.\n\n✅ تم ملء جميع الحقول الـ 24!\n\n📄 يمكنك الآن:\n• **طباعة كملف PDF** (زر الطباعة أعلى اليمين)\n• **تصدير كملف PDF أو Word أو Excel أو JSON** (زر التصدير أعلى اليمين)\n\nطلبك جاهز للتقديم! 🚀',
+        pl: '🎉 **Gratulacje!** Twój wniosek o pozwolenie na pracę jest kompletny.\n\n✅ Wszystkie 24 pola są wypełnione!\n\n📄 Możesz teraz:\n• **Wydrukować jako PDF** (Przycisk drukuj w prawym górnym rogu)\n• **Eksportować jako PDF, Word, Excel lub JSON** (Przycisk eksport w prawym górnym rogu)\n\nTwój wniosek jest gotowy do złożenia! 🚀',
+        uk: '🎉 **Вітаємо!** Ваша заявка на дозвіл на роботу заповнена.\n\n✅ Усі 24 поля заповнені!\n\n📄 Ви можете зараз:\n• **Роздрукувати як PDF** (Кнопка друку вгорі праворуч)\n• **Експортувати як PDF, Word, Excel або JSON** (Кнопка експорту вгорі праворуч)\n\nВаша заявка готова до подання! 🚀',
+        es: '🎉 **¡Felicitaciones!** Tu solicitud de permiso de trabajo está completa.\n\n✅ ¡Los 24 campos están llenos!\n\n📄 Ahora puedes:\n• **Imprimir como PDF** (Botón Imprimir arriba a la derecha)\n• **Exportar como PDF, Word, Excel o JSON** (Botón Exportar arriba a la derecha)\n\n¡Tu solicitud está lista para enviar! 🚀',
+        fr: '🎉 **Félicitations!** Votre demande de permis de travail est complète.\n\n✅ Les 24 champs sont remplis!\n\n📄 Vous pouvez maintenant:\n• **Imprimer en PDF** (Bouton Imprimer en haut à droite)\n• **Exporter en PDF, Word, Excel ou JSON** (Bouton Exporter en haut à droite)\n\nVotre demande est prête à être soumise! 🚀'
+      };
+
+      const completionMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: completionMessages[selectedLanguage] || completionMessages['de'],
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, completionMessage]);
+      setIsLoading(false);
+
+      // Call onComplete after showing the message
+      setTimeout(() => {
+        onComplete(values);
+      }, 100);
       return;
     }
 
@@ -535,14 +683,14 @@ export default function WorkPermitForm({
     try {
       const context = {
         language: selectedLanguage,
-        currentStep,
+        currentStep: nextStep,
         totalSteps,
-        fields: Object.entries(formData).map(([id, value]) => ({
+        fields: Object.entries(values).map(([id, value]) => ({
           id,
           value,
           validated: true
         })),
-        userInfo: formData
+        userInfo: values
       };
 
       const response = await fetch('/api/chat/form', {
@@ -858,33 +1006,53 @@ export default function WorkPermitForm({
     };
 
     setMessages(prev => [...prev, userMessage]);
-    
-    // Save to form data
-    setFormData(prev => ({
-      ...prev,
-      [currentFieldId]: inputValue
-    }));
+
+    // Save to form data with intelligent formatting
+    let valueToSave = inputValue.trim();
+    const currentField = formFields.find(f => f.id === currentFieldId);
+
+    // Apply formatting based on field type
+    if (currentFieldId === 'fullName') {
+      // Format name to Title Case
+      valueToSave = formatNameToTitleCase(valueToSave);
+    } else if (currentFieldId === 'dateOfBirth' || currentField?.type === 'date') {
+      // Parse date to YYYY-MM-DD format
+      const parsedDate = parseDate(valueToSave);
+      if (parsedDate) {
+        valueToSave = parsedDate;
+      }
+    } else if (currentField?.type === 'select') {
+      // Normalize dropdown values
+      valueToSave = normalizeDropdownValue(currentFieldId, valueToSave);
+    }
+
+    // Update the user's message to show the formatted value
+    setMessages(prev => {
+      const updated = [...prev];
+      const lastUserMsgIndex = updated.length - 1;
+      if (updated[lastUserMsgIndex]?.role === 'user') {
+        updated[lastUserMsgIndex] = {
+          ...updated[lastUserMsgIndex],
+          content: valueToSave
+        };
+      }
+      return updated;
+    });
+
+    const updatedFormData = {
+      ...formData,
+      [currentFieldId]: valueToSave
+    };
+    setFormData(updatedFormData);
 
     setInputValue('');
 
-    // Confirmation message
-    const confirmMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'system',
-      content: `✅ ${getConfirmationMessage()}`,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, confirmMessage]);
-
-    // Move to next question
-    setCurrentStep(prev => prev + 1);
-    
     // Reset lastAskedField so the next question can be asked
     setLastAskedField('');
-    
-    setTimeout(() => {
-      askNextQuestion();
-    }, 500);
+
+    const currentIndex = formFields.findIndex(f => f.id === currentFieldId);
+    const startIndex = currentIndex >= 0 ? currentIndex + 1 : undefined;
+    askNextQuestion(startIndex, updatedFormData);
   };
 
   const handleFormFieldChange = (fieldId: string, value: any) => {
@@ -896,17 +1064,18 @@ export default function WorkPermitForm({
       }));
     }
 
-    setFormData(prev => ({
-      ...prev,
+    const updated = {
+      ...formData,
       [fieldId]: value
-    }));
+    };
+    setFormData(updated);
     
     // Update current step if this field is ahead of current progress
     const fieldIndex = formFields.findIndex(f => f.id === fieldId);
     if (fieldIndex !== -1 && value) {
       // If field is filled, move to next empty field
       let nextEmptyIndex = fieldIndex + 1;
-      while (nextEmptyIndex < totalSteps && formData[formFields[nextEmptyIndex].id]) {
+      while (nextEmptyIndex < totalSteps && updated[formFields[nextEmptyIndex].id]) {
         nextEmptyIndex++;
       }
       
@@ -1356,7 +1525,7 @@ export default function WorkPermitForm({
               <div>
                 <h2 className="font-semibold text-gray-900">Chat Assistant</h2>
                 <p className="text-sm text-gray-600">
-                  {getStepText()} {currentStep + 1} / {totalSteps}
+                  {getStepText()} {filledFields} / {totalSteps}
                 </p>
               </div>
             </div>
@@ -1593,15 +1762,15 @@ export default function WorkPermitForm({
           </div>
 
           {/* Summary Section */}
-          {Object.keys(formData).length > 0 && (
+          {filledFields > 0 && (
             <div className="mt-8 p-4 bg-blue-50 rounded-lg">
               <h3 className="font-semibold text-blue-900 mb-2">
-                {getProgressText()}: {Object.keys(formData).length} / {totalSteps}
+                {getProgressText()}: {filledFields} / {totalSteps}
               </h3>
               <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-blue-600 transition-all duration-300"
-                  style={{ width: `${(Object.keys(formData).length / totalSteps) * 100}%` }}
+                  style={{ width: `${progress}%` }}
                 />
               </div>
             </div>

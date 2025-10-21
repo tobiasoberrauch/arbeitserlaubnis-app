@@ -35,6 +35,18 @@ export default function OllamaFormChat() {
   const totalSteps = 24;
   const progress = ((currentStep / totalSteps) * 100);
 
+  // Format name to Title Case (capitalize first letter of each word)
+  const formatNameToTitleCase = (name: string): string => {
+    return name
+      .toLowerCase()
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
+  };
+
   const supportedLanguages = [
     { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -238,9 +250,27 @@ export default function OllamaFormChat() {
       }
 
       // Save validated answer
-      const valueToSave = validation.correctedValue && validation.correctedValue.trim()
+      let valueToSave = validation.correctedValue && validation.correctedValue.trim()
         ? validation.correctedValue
         : inputValue;
+
+      // Format name to Title Case (capitalize first letter of each word)
+      if (currentFieldId === 'fullName') {
+        valueToSave = formatNameToTitleCase(valueToSave);
+
+        // Update the user's message to show the formatted name
+        setMessages(prev => {
+          const updated = [...prev];
+          const lastUserMsgIndex = updated.length - 1;
+          if (updated[lastUserMsgIndex]?.role === 'user') {
+            updated[lastUserMsgIndex] = {
+              ...updated[lastUserMsgIndex],
+              content: valueToSave
+            };
+          }
+          return updated;
+        });
+      }
 
       console.log('💾 Saving value:', { fieldId: currentFieldId, value: valueToSave });
 
@@ -249,17 +279,7 @@ export default function OllamaFormChat() {
         [currentFieldId]: valueToSave
       }));
 
-      // Confirmation message
-      const confirmMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'system',
-        content: `✅ ${getConfirmationMessage()} "${valueToSave}"`,
-        timestamp: new Date(),
-        validated: true
-      };
-      setMessages(prev => [...prev, confirmMessage]);
-
-      // Move to next question immediately
+      // Move to next question immediately (no confirmation message)
       console.log('➡️ Moving to next question. Current step:', currentStep);
       const nextStep = currentStep + 1;
       setCurrentStep(nextStep);

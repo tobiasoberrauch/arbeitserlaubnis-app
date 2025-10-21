@@ -4,25 +4,9 @@
  * OpenAI-compatible chat completions API
  */
 
-export interface GermanAIConfig {
-  model?: string;
-  temperature?: number;
-  language?: string;
-  maxTokens?: number;
-}
+import { AIService, AIConfig, ChatMessage, ChatResponse } from './aiService';
 
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-export interface ChatResponse {
-  message: string;
-  model: string;
-  language?: string;
-}
-
-class GermanAIService {
+class GermanAIService implements AIService {
   private apiUrl: string;
   private apiKey: string;
   private defaultModel: string;
@@ -50,7 +34,7 @@ class GermanAIService {
 
   async chat(
     messages: ChatMessage[],
-    config?: GermanAIConfig
+    config?: AIConfig
   ): Promise<ChatResponse> {
     try {
       const model = config?.model || this.defaultModel;

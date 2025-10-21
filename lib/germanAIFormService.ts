@@ -1,7 +1,10 @@
 /**
- * GermanAI Form Service
- * Specialized service for work permit form processing with GermanAI.tech API
+ * AI Form Service
+ * Specialized service for work permit form processing
+ * Works with any AI provider (GermanAI, OpenAI, etc.)
  */
+
+import aiProvider from './aiProvider';
 
 export interface FormField {
   id: string;
@@ -25,10 +28,8 @@ export interface FormResponse {
   helpText?: string;
 }
 
-class GermanAIFormService {
-  private apiUrl: string;
-  private apiKey: string;
-  private defaultModel: string;
+class AIFormService {
+  private aiService = aiProvider.getAIService();
 
   private formFields = [
     'fullName', 'dateOfBirth', 'nationality', 'passportNumber',
@@ -68,15 +69,7 @@ class GermanAIFormService {
     el: 'Ελληνικά'
   };
 
-  constructor() {
-    this.apiUrl = process.env.GERMANAI_API_URL || 'https://germanai.tech/api/v1/chat/completions';
-    this.apiKey = process.env.GERMANAI_API_KEY || '';
-    this.defaultModel = process.env.GERMANAI_MODEL || 'qwen3:32b';
-
-    if (!this.apiKey) {
-      console.warn('⚠️ GERMANAI_API_KEY not set in environment');
-    }
-  }
+  // AI service is injected via aiProvider
 
   private getSystemPrompt(language: string): string {
     const langName = this.languageNames[language] || this.languageNames['en'];
@@ -149,16 +142,18 @@ Denk dran: Antworte NUR in ${langName}!`;
 3. Wichtige Hinweise oder Anforderungen
 4. Formatiere alles in ${this.languageNames[language]}`;
 
-      const response = await this.callGermanAI({
-        model: this.defaultModel,
-        messages: [
+      const response = await this.aiService.chat(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3 // Lower temperature for consistent form questions
-      });
+        {
+          temperature: 0.3,
+          language: language
+        }
+      );
 
-      const questionText = response.choices[0].message.content;
+      const questionText = response.message;
 
       return {
         question: questionText,
@@ -198,19 +193,20 @@ Antworte im JSON Format:
   "correctedValue": "korrigierter Wert falls nötig"
 }`;
 
-      const response = await this.callGermanAI({
-        model: this.defaultModel,
-        messages: [
+      const response = await this.aiService.chat(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.1, // Very low temperature for validation
-        response_format: { type: 'json_object' }
-      });
+        {
+          temperature: 0.1,
+          language: language
+        }
+      );
 
       try {
         // Clean the response - remove markdown code blocks if present
-        let cleanedContent = response.choices[0].message.content.trim();
+        let cleanedContent = response.message.trim();
 
         // Remove markdown code blocks
         cleanedContent = cleanedContent.replace(/^```(?:json)?\n?/i, '');
@@ -226,11 +222,11 @@ Antworte im JSON Format:
 
         return parsed;
       } catch (parseError) {
-        console.warn('Failed to parse validation response as JSON:', response.choices[0].message.content);
+        console.warn('Failed to parse validation response as JSON:', response.message);
         console.warn('Parse error:', parseError);
 
         // Try to detect if the response indicates validity
-        const content = response.choices[0].message.content.toLowerCase();
+        const content = response.message.toLowerCase();
         const isValid = !content.includes('invalid') &&
                        !content.includes('incorrect') &&
                        !content.includes('wrong') &&
@@ -239,7 +235,7 @@ Antworte im JSON Format:
 
         return {
           valid: isValid,
-          message: response.choices[0].message.content
+          message: response.message
         };
       }
     } catch (error) {
@@ -274,16 +270,18 @@ Erstelle eine gut formatierte Zusammenfassung die:
 
 MUSS in ${this.languageNames[language]} Sprache sein!`;
 
-      const response = await this.callGermanAI({
-        model: this.defaultModel,
-        messages: [
+      const response = await this.aiService.chat(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.2
-      });
+        {
+          temperature: 0.2,
+          language: language
+        }
+      );
 
-      return response.choices[0].message.content;
+      return response.message;
     } catch (error) {
       console.error('Error generating summary:', error);
       throw error;
@@ -300,18 +298,19 @@ Behalte alle Formatierungen, Daten, Zahlen und Eigennamen bei.
 Übersetze nur den Text-Inhalt.
 Gib als JSON zurück.`;
 
-      const response = await this.callGermanAI({
-        model: this.defaultModel,
-        messages: [
+      const response = await this.aiService.chat(
+        [
           { role: 'system', content: 'Du bist ein professioneller Übersetzer für offizielle Dokumente.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.1,
-        response_format: { type: 'json_object' }
-      });
+        {
+          temperature: 0.1,
+          language: toLang
+        }
+      );
 
       try {
-        return JSON.parse(response.choices[0].message.content);
+        return JSON.parse(response.message);
       } catch {
         return formData; // Return original if parsing fails
       }
@@ -335,40 +334,24 @@ Beinhalte:
 
 Antwort MUSS in ${this.languageNames[language]} sein!`;
 
-      const response = await this.callGermanAI({
-        model: this.defaultModel,
-        messages: [
+      const response = await this.aiService.chat(
+        [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3
-      });
+        {
+          temperature: 0.3,
+          language: language
+        }
+      );
 
-      return response.choices[0].message.content;
+      return response.message;
     } catch (error) {
       console.error('Error providing help:', error);
       throw error;
     }
   }
 
-  private async callGermanAI(payload: any): Promise<any> {
-    const response = await fetch(this.apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GermanAI API error:', response.status, errorText);
-      throw new Error(`GermanAI API error: ${response.status}`);
-    }
-
-    return await response.json();
-  }
 
   private extractExamples(text: string): string[] {
     const lines = text.split('\n');
@@ -405,4 +388,4 @@ Antwort MUSS in ${this.languageNames[language]} sein!`;
   }
 }
 
-export default new GermanAIFormService();
+export default new AIFormService();
